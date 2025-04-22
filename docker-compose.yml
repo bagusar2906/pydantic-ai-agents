@@ -22,8 +22,8 @@ services:
     environment:
       - OPENWEBUI_AUTH=false
       - ALLOW_CUSTOM_API=true
-    depends_on:
-      - backend
+    # depends_on:
+    #   - backend
 
 volumes:
   openwebui-data:
