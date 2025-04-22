@@ -1,0 +1,29 @@
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: doc-chat-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: openwebui
+    ports:
+      - "3000:8080"
+    volumes:
+      - openwebui-data:/app/backend/data
+      - ./openwebui-models:/app/backend/data/models/custom
+    environment:
+      - OPENWEBUI_AUTH=false
+      - ALLOW_CUSTOM_API=true
+    depends_on:
+      - backend
+
+volumes:
+  openwebui-data:
