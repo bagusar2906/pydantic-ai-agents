@@ -28,6 +28,20 @@
           "panel": "new"
         },
         "problemMatcher": []
+      },
+      {
+        "label": "View Agent Logs",
+        "type": "shell",
+        "command": "docker logs -f pydantic-agent",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": []
       }
     ]
   }
