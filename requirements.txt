@@ -1,8 +1,0 @@
-langchain 
-langchain-community
-supabase
-openai 
-fastapi 
-pydantic 
-python-dotenv
-python-multipart
