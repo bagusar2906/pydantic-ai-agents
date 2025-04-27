@@ -1,29 +1,37 @@
+version: '3.8'
 
 services:
-  backend:
+  pydantic-agent:
     build:
-      context: ./backend
-    container_name: doc-chat-backend
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: pydantic-agent
     ports:
       - "8000:8000"
-    env_file:
-      - .env
-    volumes:
-      - ./backend:/app
+    networks:
+      - appnet
 
   openwebui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: openwebui
     ports:
       - "3000:8080"
+    environment:
+      - "OPENAI_API_BASE_URL=http://localhost:8000/v1"
+      - "OPENAI_API_KEY=dummy-key"   # Needed even for Custom
+      - "WEBUI_AUTH_SECRET=admin"           # Optional: set default admin password
+      - "WEBUI_NAME=Bagus WebUI"                # Optional: name shown in title bar
+      - "WEBUI_MODELS=friendly-bot,grumpy-bot,tech-support-bot"  # List models here
+      - "WEBUI_MODEL_PROVIDER=custom"               # Important: tell OpenWebUI to use custom
     volumes:
       - openwebui-data:/app/backend/data
-      - ./openwebui-models:/app/backend/data/models/custom
-    environment:
-      - OPENWEBUI_AUTH=false
-      - ALLOW_CUSTOM_API=true
-    # depends_on:
-    #   - backend
+    networks:
+      - appnet
+    depends_on:
+      - pydantic-agent
+
+networks:
+  appnet:
 
 volumes:
   openwebui-data:

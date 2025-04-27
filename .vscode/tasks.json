@@ -2,9 +2,23 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "Run Agent Service",
+        "label": "Build & Run Agent Service",
         "type": "shell",
-        "command": "uvicorn agent-service:app --host 0.0.0.0 --port 8000",
+        "command": "docker compose up --build",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Run Service",
+        "type": "shell",
+        "command": "docker compose up -d",
         "group": {
           "kind": "build",
           "isDefault": true
