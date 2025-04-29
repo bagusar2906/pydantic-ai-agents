@@ -1,5 +1,5 @@
 # Use official Python image
-FROM python:3.11-slim
+FROM python:3.13-slim-bookworm
 
 # Set working directory
 WORKDIR /app
@@ -7,8 +7,9 @@ WORKDIR /app
 # Copy app code
 COPY . .
 
-# Install FastAPI and Uvicorn
-RUN pip install fastapi uvicorn
+# Install dependencies
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
 
 

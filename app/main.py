@@ -8,6 +8,7 @@ import time
 import uuid
 from fastapi.responses import StreamingResponse
 import asyncio
+from agent import agent_executor
 
 
 # Incoming message format
@@ -142,9 +143,17 @@ async def list_models():
 @app.post("/v1/chat/completions")
 async def chat_completions(chat: ChatRequest):
     model = chat.model
-    messages = chat.messages
-    stream = chat.stream
+    # qmessages = chat.messages
+   
+    user_message = chat.messages[-1].content
 
+
+    # Call the agent
+    full_response = await agent_executor.ainvoke(
+        {"input": user_message}
+    )
+
+    print(full_response)
     # Your bot generates response text
     # full_response = f"Hello from {model}! You said: {messages[-1].content}"
     # Handle different models
