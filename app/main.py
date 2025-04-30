@@ -71,7 +71,7 @@ async def chat_stream_generator(reply_text: str, model: str) -> AsyncGenerator[s
                 )
             ]
         )
-        yield f"data: {chunk_data.json()}\n\n"
+        yield f"data: {chunk_data.model_dump_json()}\n\n"
         await asyncio.sleep(0.2)  # slow typing effect
     # Final message
     done_data = ChatCompletionChunk(
@@ -87,7 +87,7 @@ async def chat_stream_generator(reply_text: str, model: str) -> AsyncGenerator[s
             )
         ]
     )
-    yield f"data: {done_data.json()}\n\n"
+    yield f"data: {done_data.model_dump_json()}\n\n"
     yield "data: [DONE]\n\n"
 
 # FastAPI app
@@ -143,7 +143,7 @@ async def list_models():
 @app.post("/v1/chat/completions")
 async def chat_completions(chat: ChatRequest):
     model = chat.model
-    # qmessages = chat.messages
+    messages = chat.messages
    
     user_message = chat.messages[-1].content
 
@@ -153,15 +153,20 @@ async def chat_completions(chat: ChatRequest):
         {"input": user_message}
     )
 
-    print(full_response)
+    final_answer = full_response["output"]
+    
+    print("User message:" + str(user_message))
+
+    print("Agent response:" + str(full_response))
+    
     # Your bot generates response text
     # full_response = f"Hello from {model}! You said: {messages[-1].content}"
     # Handle different models
     if model not in models:
         return {"error": "Model not found"}
     
-    full_response = models[model](messages)
+    # full_response = models[model](messages)
   
     # stream mode: send small chunks
 
-    return StreamingResponse(chat_stream_generator(full_response, model), media_type="text/event-stream")
+    return StreamingResponse(chat_stream_generator(final_answer, model), media_type="text/event-stream")
