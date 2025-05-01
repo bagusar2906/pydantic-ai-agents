@@ -30,6 +30,10 @@ class StreamHandler(BaseCallbackHandler):
                 time.sleep(self.delay)
             self.container.markdown(self.text, unsafe_allow_html=False)  # Final display
 
+    def finalize(self):
+        if self.container:
+            self.container.markdown(self.text, unsafe_allow_html=False)
+
        
 
 # Define your tools
