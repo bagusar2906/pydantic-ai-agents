@@ -16,16 +16,20 @@ import time
 load_dotenv()
 
 class StreamHandler(BaseCallbackHandler):
-    def __init__(self, container=None):
+    def __init__(self, container=None, delay: float = 0.05):
         self.container = container
         self.text = ""
+        self.delay = delay
 
     def on_llm_new_token(self, token: str, **kwargs):
+        self.text += token
         if self.container:
+            # Typing effect
             for char in token:
-                self.text += char
-                self.container.markdown(self.text)
-                time.sleep(0.05)  # Typing speed per character
+                self.container.markdown(self.text + "▌", unsafe_allow_html=False)
+                time.sleep(self.delay)
+            self.container.markdown(self.text, unsafe_allow_html=False)  # Final display
+
        
 
 # Define your tools
