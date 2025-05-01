@@ -5,13 +5,18 @@ from agent import get_agent_executor
 from chat_history import load_chat, save_chat
 
 def render_chat_history(chat_history, skip_last_user=False, skip_last_assistant=False):
+    print(f"skip_last_user: {skip_last_user}, skip_last_assistant: {skip_last_assistant}")
     for i, (role, msg) in enumerate(chat_history):
-        is_last = i == len(chat_history) - 1
-        if (skip_last_assistant and role == "assistant" and is_last) or \
-           (skip_last_user and role == "user" and is_last):
+        is_last_assistant = role == "assistant" and i == len(chat_history) - 1
+        is_last_user = role == "user" and i == len(chat_history) - 2
+        
+        if (skip_last_assistant and is_last_assistant) or \
+           (skip_last_user and is_last_user):
             continue
+       
         with st.chat_message("user" if role == "user" else "assistant", avatar="🧑" if role == "user" else "🤖"):
             st.markdown(msg)
+        
 
 
 st.set_page_config(page_title="🧠 LangChain Agent", layout="wide")
@@ -59,6 +64,7 @@ if user_input:
                     "chat_history": st.session_state.chat_history
                 })
                 reply = result["output"]
+                stream_handler.finalize()  # Show full streamed markdown with formatting
                 
                 st.session_state.chat_history.append(("assistant", reply))
                 save_chat(st.session_state.chat_history)
@@ -73,6 +79,8 @@ render_chat_history(
     skip_last_assistant=bool(user_input)
 )
 
+# --- Render chat history ---
+# render_chat_history(st.session_state.chat_history)
 
 
 # for role, msg in st.session_state.chat_history:
