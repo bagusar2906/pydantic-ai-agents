@@ -5,7 +5,6 @@ from agent import get_agent_executor
 from chat_history import load_chat, save_chat
 
 def render_chat_history(chat_history, skip_last_user=False, skip_last_assistant=False):
-    print(f"skip_last_user: {skip_last_user}, skip_last_assistant: {skip_last_assistant}")
     for i, (role, msg) in enumerate(chat_history):
         is_last_assistant = role == "assistant" and i == len(chat_history) - 1
         is_last_user = role == "user" and i == len(chat_history) - 2
