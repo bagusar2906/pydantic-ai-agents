@@ -11,6 +11,7 @@ from langchain_core.prompts.chat import MessagesPlaceholder
 from langchain.agents import create_openai_functions_agent  # Import create_openai_functions_agent
 from langchain.callbacks.base import BaseCallbackHandler
 import os
+import time
 
 load_dotenv()
 
@@ -20,29 +21,15 @@ class StreamHandler(BaseCallbackHandler):
         self.text = ""
 
     def on_llm_new_token(self, token: str, **kwargs):
-        self.text += token
         if self.container:
-            self.container.markdown(self.text)
-        
-# Initialize your LLM
-# llm = ChatOpenAI(
-#     model="gpt-4o",  # or "gpt-4-turbo"
-#     temperature=0,
-#     callbacks=[StreamingStdOutCallbackHandler()],
-#     streaming=True
-# )
+            for char in token:
+                self.text += char
+                self.container.markdown(self.text)
+                time.sleep(0.05)  # Typing speed per character
+       
 
 # Define your tools
 tools = [get_current_weather, search_wikipedia]
-
-
-# Create the AgentExecutor
-# agent_executor = initialize_agent(
-#     tools,
-#     llm,
-#     agent=AgentType.OPENAI_FUNCTIONS,
-#     verbose=True,
-# )
 
 def get_agent_executor(model_name: str):
     # Choose model
