@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "Build & Run Agent Service",
+        "label": "Build & Run Agent",
         "type": "shell",
         "command": "docker compose up --build",
         "group": {
@@ -16,12 +16,40 @@
         "problemMatcher": []
       },
       {
-        "label": "Run Service",
+        "label": "Run Agent Service",
         "type": "shell",
         "command": "docker compose up -d",
         "group": {
           "kind": "build",
-          "isDefault": true
+          "isDefault": false
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Stop Agent Service",
+        "type": "shell",
+        "command": "docker compose stop",
+        "group": {
+          "kind": "build",
+          "isDefault": false
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Streamlit app",
+        "type": "shell",
+        "command": "streamlit run app/app.py",
+        "group": {
+          "kind": "build",
+          "isDefault": false
         },
         "presentation": {
           "reveal": "always",
@@ -35,7 +63,7 @@
         "command": "docker logs -f pydantic-agent",
         "group": {
           "kind": "build",
-          "isDefault": true
+          "isDefault": false
         },
         "presentation": {
           "reveal": "always",
