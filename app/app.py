@@ -1,21 +1,17 @@
 import streamlit as st
 from agent import get_agent_executor
 
-from utils import auto_scroll_to_bottom
 from chat_history import load_chat, save_chat
 
-def render_chat_history(chat_history, skip_last_user=False, skip_last_assistant=False):
-    for i, (role, msg) in enumerate(chat_history):
-        is_last_assistant = role == "assistant" and i == len(chat_history) - 1
-        is_last_user = role == "user" and i == len(chat_history) - 2
-        
-        if (skip_last_assistant and is_last_assistant) or \
-           (skip_last_user and is_last_user):
-            continue
-       
-        with st.chat_message("user" if role == "user" else "assistant", avatar="🧑" if role == "user" else "🤖"):
-            st.markdown(msg)
-        
+# Ensure streamlit is installed
+try:
+    import streamlit as st
+except ModuleNotFoundError:
+    raise ImportError("Streamlit is not installed. Please run 'pip install streamlit' to use this app.")
+
+import time
+from agent import get_agent_executor
+from chat_history import load_chat, save_chat
 
 st.set_page_config(page_title="🧠 LangChain Agent", layout="wide")
 st.title("🧠 LangChain Agent with Tools")
@@ -46,35 +42,52 @@ agent_executor, stream_handler = get_agent_executor(model_choice)
 user_input = st.chat_input("Type your message...")
 
 if user_input:
-
+    st.session_state.chat_history.append(("user", user_input))
     with st.chat_message("user", avatar="🧑"):
         st.markdown(user_input)
-    st.session_state.chat_history.append(("user", user_input))
-    
-    # Autoscroll using placeholder
-    message_placeholder = st.empty()
+
     with st.chat_message("assistant", avatar="🤖"):
-        stream_handler.container = message_placeholder
+        container = st.empty()
+        stream_handler.container = container
+        time.sleep(0.5)  # typing delay
         with st.spinner("Thinking..."):
             try:
                 result = agent_executor.invoke({
                     "input": user_input,
                     "chat_history": st.session_state.chat_history
                 })
-                reply = result["output"]
-                stream_handler.finalize()  # Show full streamed markdown with formatting
                 
-                st.session_state.chat_history.append(("assistant", reply))
+            
+                reply = result["output"]
+
+                # Extract tool used if available
+                tool_used = None
+                for step in result.get("intermediate_steps", []):
+                    tool_used = step[0].tool
+                print("Tool used:", tool_used)
+                print("Reply:", reply)
+                # Store assistant message with tool label
+                st.session_state.chat_history.append((tool_used or "assistant", reply))
                 save_chat(st.session_state.chat_history)
             except Exception as e:
                 st.error(f"Error: {e}")
 
+# --- Render chat history with avatar mapping ---
+avatar_map = {
+    "assistant": "🤖",
+    "user": "👤",
+    "wikipedia": "📚",
+    "get_current_weather": "☀️",
+}
 
-# --- Render chat history ---
-render_chat_history(
-    st.session_state.chat_history,
-    skip_last_user=bool(user_input),
-    skip_last_assistant=bool(user_input)
-)
+for role, msg in reversed(st.session_state.chat_history):
+    avatar = avatar_map.get(role, "🤖")
+    with st.chat_message(role if role in ["user", "assistant"] else "assistant", avatar=avatar):
+        st.markdown(msg)
 
-auto_scroll_to_bottom()
+# --- Autoscroll to top ---
+st.markdown("""
+    <script>
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    </script>
+""", unsafe_allow_html=True)
