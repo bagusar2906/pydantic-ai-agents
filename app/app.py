@@ -1,7 +1,7 @@
 import streamlit as st
 from agent import get_agent_executor
 
-
+from utils import auto_scroll_to_bottom
 from chat_history import load_chat, save_chat
 
 def render_chat_history(chat_history, skip_last_user=False, skip_last_assistant=False):
@@ -16,7 +16,6 @@ def render_chat_history(chat_history, skip_last_user=False, skip_last_assistant=
         with st.chat_message("user" if role == "user" else "assistant", avatar="🧑" if role == "user" else "🤖"):
             st.markdown(msg)
         
-
 
 st.set_page_config(page_title="🧠 LangChain Agent", layout="wide")
 st.title("🧠 LangChain Agent with Tools")
@@ -78,10 +77,4 @@ render_chat_history(
     skip_last_assistant=bool(user_input)
 )
 
-# --- Render chat history ---
-# render_chat_history(st.session_state.chat_history)
-
-
-# for role, msg in st.session_state.chat_history:
-#     with st.chat_message("user" if role == "user" else "assistant", avatar="🧑" if role == "user" else "🤖"):
-#         st.markdown(msg)
+auto_scroll_to_bottom()

@@ -1,40 +1,19 @@
-# agent.py
 
 from langchain.chat_models import ChatOpenAI
 from langchain.agents import AgentExecutor
-
 from tools import get_current_weather, search_wikipedia
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOllama  # Import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts.chat import MessagesPlaceholder
-from langchain.agents import create_openai_functions_agent  # Import create_openai_functions_agent
-from langchain.callbacks.base import BaseCallbackHandler
+from langchain.agents import create_openai_functions_agent  
+from stream_util import StreamHandler
+
 import os
 import time
 
 load_dotenv()
 
-class StreamHandler(BaseCallbackHandler):
-    def __init__(self, container=None, delay: float = 0.05):
-        self.container = container
-        self.text = ""
-        self.delay = delay
-
-    def on_llm_new_token(self, token: str, **kwargs):
-        self.text += token
-        if self.container:
-            # Typing effect
-            for char in token:
-                self.container.markdown(self.text + "▌", unsafe_allow_html=False)
-                time.sleep(self.delay)
-            self.container.markdown(self.text, unsafe_allow_html=False)  # Final display
-
-    def finalize(self):
-        if self.container:
-            self.container.markdown(self.text, unsafe_allow_html=False)
-
-       
 
 # Define your tools
 tools = [get_current_weather, search_wikipedia]
