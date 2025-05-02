@@ -10,7 +10,6 @@ from langchain.agents import create_openai_functions_agent
 from stream_util import StreamHandler
 
 import os
-import time
 
 load_dotenv()
 
@@ -48,6 +47,7 @@ def get_agent_executor(model_name: str):
     agent = create_openai_functions_agent(llm=llm, tools=tools, prompt=prompt)
 
     # Wrap in executor
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, return_intermediate_steps=True)
 
     return agent_executor, stream_handler
+
