@@ -8,7 +8,7 @@ import time
 import uuid
 from fastapi.responses import StreamingResponse
 import asyncio
-from agent import agent_executor
+from agent import get_agent_executor
 
 
 # Incoming message format
@@ -123,15 +123,15 @@ async def list_models():
         "object": "list",
         "data": [
             {
-                "id": "friendly-bot",
+                "id": "gpt-4o",
                 "object": "model",
             },
             {
-                "id": "grumpy-bot",
+                "id": "gpt-3.5-turbo",
                 "object": "model",
             },
             {
-                "id": "tech-support-bot",
+                "id": "ollama:llama3",
                 "object": "model",
             }
             # Add more models if you want
@@ -143,10 +143,10 @@ async def list_models():
 @app.post("/v1/chat/completions")
 async def chat_completions(chat: ChatRequest):
     model = chat.model
-    messages = chat.messages
    
     user_message = chat.messages[-1].content
 
+    agent_executor, stream_handler = get_agent_executor(model)
 
     # Call the agent
     full_response = await agent_executor.ainvoke(
