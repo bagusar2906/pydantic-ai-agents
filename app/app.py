@@ -1,7 +1,8 @@
 import streamlit as st
 from agent import get_agent_executor
+import time
+from conversation import Conversation 
 
-from chat_history import load_chat, save_chat
 
 # --- Render chat history with avatar mapping ---
 avatar_map = {
@@ -23,11 +24,7 @@ try:
 except ModuleNotFoundError:
     raise ImportError("Streamlit is not installed. Please run 'pip install streamlit' to use this app.")
 
-import time
-from agent import get_agent_executor
-
-from conversation import Conversation  # Replace 'some_module' with the actual module where Conversation is defined
-
+# --- Initialize session state ---
 conv = Conversation(chats=[])
 conv.load_from_file()
 
