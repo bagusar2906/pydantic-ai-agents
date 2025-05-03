@@ -10,6 +10,8 @@ DEFAULT_REPLY_TYPE = "tool"
 
 class ReplyType(Enum):
     ASSISTANT = "assistant"
+    WEATHER = "get_current_weather"
+    SEARCH_WIKIPEDIA = "search_wikipedia"
     TOOL = "tool"
 
     def __str__(self):
@@ -82,18 +84,17 @@ class Conversation(BaseModel):
             json.dump(self.to_dict(), f, indent=2)
         print(f"Conversation saved to '{file_path}'.")
 
-    def chat_history(self, limit: int = None, skip: int = 0) -> List[List[str]]:
+    def chat_history(self, limit: int = None, skip: int = 0, use_defaul_reply_type: bool = False) -> List[List[str]]:
         raw = []
         chats = self.get_reversed(limit)[skip:]  # Skip the first `n` chats
         for chat in chats:
             raw.append(["user", chat.user])
-            raw.append(["assistant", chat.reply_msg])
-            # if chat.reply_type == ReplyType.ASSISTANT.value or chat.reply_type == ReplyType.TOOL.value:
-            #     raw.append([chat.reply_type, chat.reply_msg])
-            # else:
-            #     raw.append([DEFAULT_REPLY_TYPE, chat.reply_msg])
+            if use_defaul_reply_type:
+                raw.append([ReplyType.ASSISTANT.value, chat.reply_msg])
+            else:
+                raw.append([chat.reply_type, chat.reply_msg])
         return raw
-        #return json.dumps(raw, indent=2)
+       
         
     def load_from_file(self, file_path: str = DEFAULT_CONVERSATION_FILE):
         if not os.path.exists(file_path):

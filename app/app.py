@@ -1,19 +1,20 @@
 import streamlit as st
 from agent import get_agent_executor
 import time
-from conversation import Conversation 
+from conversation import Conversation , ReplyType
 
 
 # --- Render chat history with avatar mapping ---
 avatar_map = {
-    "assistant": "🤖",
+    ReplyType.ASSISTANT.value: "🤖",
     "user": "👤",
-    "wikipedia": "📚",
-    "get_current_weather": "☀️",
+    ReplyType.SEARCH_WIKIPEDIA.value: "📚",
+    ReplyType.WEATHER.value: "☀️",
 }
 
 def render_chat_history(chat_history, avatar_map):
     for role, msg in chat_history:
+        print(f"Role: {role}, Message: {msg}")
         avatar = avatar_map.get(role, "🤖")
         with st.chat_message(role if role in ["user", "assistant"] else "assistant", avatar=avatar):
             st.markdown(msg)
@@ -92,7 +93,7 @@ if user_input:
 # --- Load chat history ---
 if "chat_history" not in st.session_state:
     chat_history = conv.chat_history(limit=10, skip=0)  
-    st.session_state.chat_history = chat_history
+    st.session_state.chat_history =  conv.chat_history(limit=10, skip=0, use_defaul_reply_type=True) 
 else:
     chat_history = conv.chat_history(limit=10, skip=1)  
 
