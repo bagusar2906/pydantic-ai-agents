@@ -9,7 +9,7 @@ avatar_map = {
     ReplyType.ASSISTANT.value: "🤖",
     "user": "👤",
     ReplyType.SEARCH_WIKIPEDIA.value: "📚",
-    ReplyType.WEATHER.value: "☀️",
+    ReplyType.WEATHER.v: "☀️",
 }
 
 def render_chat_history(chat_history, avatar_map):
