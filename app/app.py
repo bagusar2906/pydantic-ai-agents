@@ -3,6 +3,20 @@ from agent import get_agent_executor
 
 from chat_history import load_chat, save_chat
 
+# --- Render chat history with avatar mapping ---
+avatar_map = {
+    "assistant": "🤖",
+    "user": "👤",
+    "wikipedia": "📚",
+    "get_current_weather": "☀️",
+}
+
+def render_chat_history(chat_history, avatar_map):
+    for role, msg in chat_history:
+        avatar = avatar_map.get(role, "🤖")
+        with st.chat_message(role if role in ["user", "assistant"] else "assistant", avatar=avatar):
+            st.markdown(msg)
+
 # Ensure streamlit is installed
 try:
     import streamlit as st
@@ -11,7 +25,11 @@ except ModuleNotFoundError:
 
 import time
 from agent import get_agent_executor
-from chat_history import load_chat, save_chat
+
+from conversation import Conversation  # Replace 'some_module' with the actual module where Conversation is defined
+
+conv = Conversation(chats=[])
+conv.load_from_file()
 
 st.set_page_config(page_title="🧠 LangChain Agent", layout="wide")
 st.title("🧠 LangChain Agent with Tools")
@@ -23,7 +41,7 @@ st.sidebar.markdown("---")
 # Reset button
 if st.sidebar.button("🔄 Reset Chat"):
     st.session_state.chat_history = []
-    save_chat([])  # Clear persistent chat
+    conv.clear()  # Clear persistent chat
     st.rerun()
 
 # Download history
@@ -31,15 +49,14 @@ if st.sidebar.button("📄 Download Chat"):
     history = "\n".join([f"{'User' if r=='user' else 'Assistant'}: {m}" for r, m in st.session_state.get("chat_history", [])])
     st.sidebar.download_button("Save .txt", history, file_name="chat_history.txt")
 
-# --- Load chat history ---
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = load_chat()
+
 
 # --- LangChain Agent Setup ---
 agent_executor, stream_handler = get_agent_executor(model_choice)
 
 # --- Chat input/output ---
 user_input = st.chat_input("Type your message...")
+
 
 if user_input:
     st.session_state.chat_history.append(("user", user_input))
@@ -64,26 +81,25 @@ if user_input:
                 tool_used = None
                 for step in result.get("intermediate_steps", []):
                     tool_used = step[0].tool
-                print("Tool used:", tool_used)
-                print("Reply:", reply)
+                print(f"Tool used: {tool_used}")
+                
                 # Store assistant message with tool label
-                st.session_state.chat_history.append((tool_used or "assistant", reply))
-                save_chat(st.session_state.chat_history)
+                st.session_state.chat_history.append(("assistant", reply))
+                conv.add(user_input, tool_used or "assistant", reply)  # Add to conversation history
+                conv.save_to_file()  # Save conversation to file
+                
             except Exception as e:
                 st.error(f"Error: {e}")
 
-# --- Render chat history with avatar mapping ---
-avatar_map = {
-    "assistant": "🤖",
-    "user": "👤",
-    "wikipedia": "📚",
-    "get_current_weather": "☀️",
-}
 
-for role, msg in reversed(st.session_state.chat_history):
-    avatar = avatar_map.get(role, "🤖")
-    with st.chat_message(role if role in ["user", "assistant"] else "assistant", avatar=avatar):
-        st.markdown(msg)
+# --- Load chat history ---
+if "chat_history" not in st.session_state:
+    chat_history = conv.chat_history(limit=10, skip=0)  
+    st.session_state.chat_history = chat_history
+else:
+    chat_history = conv.chat_history(limit=10, skip=1)  
+
+render_chat_history(chat_history, avatar_map)
 
 # --- Autoscroll to top ---
 st.markdown("""
